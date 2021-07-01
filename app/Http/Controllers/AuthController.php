@@ -87,13 +87,13 @@ class AuthController extends Controller
            'name' =>'required',
            'email' =>'required|unique:users,email',
            'password' =>'required|min:6',
-           'role' =>'required',
+           'roleid' =>'required',
         ]);
       
         $data =$request->only(['name','email','password']);
         $user = new User($data);
         $user->save();
-        if ($request->role == 1) {
+        if ($request->roleid == 2) {
             $user->assignRole('Admin');
         }else{
             $user->assignRole('vendedor');

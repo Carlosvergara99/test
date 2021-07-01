@@ -1,6 +1,8 @@
 <template>
 <div>
      <button class="btn btn-success" data-toggle="modal" data-target="#addNew" @click="openModalWindow">Crear Usario <i></i></button>
+               <!-- <input type="text" v-model="buscar" class="form-control" placeholder=""/>               -->
+
     <br>
    <table class="table table-hover  table-bordered">
     <thead>
@@ -17,9 +19,9 @@
         <td>{{user.id}}</td>
         <td>{{user.name}}</td>
         <td>{{user.email}}</td>
-        <td>{{user.rol}}</td>
+        <td>{{user.roles[0].name}}</td>
         <td><a href="#" data-id="user.id" class="btn btn-info" @click="editModalWindow(user)"> Editar</a>
-            <a href="#" class="btn btn-danger">Eliminar</a>
+            <a href="#" class="btn btn-danger" @click="DeleteUser(user.id)">Eliminar</a>
         </td>
 
       </tr>
@@ -40,24 +42,36 @@
                <form @submit.prevent="editMode ? updateUser() : createUser()">
                      <div class="modal-body">
                       <div class="form-group">
+                       <label for="name">Nombre</label>
+ 
                         <input v-model="form.name" type="text" name="name" placeholder="Name" class="form-control" >
+                        <p class="text-danger" v-text="errors.name"></p>
+
                     </div>
 
                     <div class="form-group">
+                     <label for="email">Email</label>
                      <input v-model="form.email" type="email" name="email" placeholder="Email " class="form-control" >
+                       <p class="text-danger" v-text="errors.email"></p>
                    </div>
 
                    <div class="form-group">
+                      <label for="password">Contraseña</label>
+
                      <input v-model="form.password" type="password" name="password" id="password" placeholder="password" class="form-control"  >
+                      <p class="text-danger" v-text="errors.password"></p>
+
                    </div>
 
                    <div class="form-group">
-                      <select name="type" v-model="form.type" id="type" class="form-control" p >
-                         <option value="">Select Rol</option>
-                         <option value="2">Admin</option>
-                         <option value="1">Vendedor</option>
+                      <label  for="rol">Rol</label>
 
+                      <select name="type" v-model="form.roleid" id="role" class="form-control" placeholder="Seleccione">
+                       <option value="">Seleccione</option>
+                      <option value="2">Administrador</option>
+                      <option value="1">Vendedor</option>
                       </select>
+                        <p class="text-danger" v-text="errors.roleid"></p>
                    </div>
               </div>
              <div class="modal-footer">
@@ -84,24 +98,102 @@ export default {
                     name : '',
                     email: '',
                     password: '',
-                    type: ''
+                    roleid: '',
                 },
+                formedit:{},
+                 errors: {},
+                    buscar: ''
+
             }
         },
     mounted() {
-        this.getUser();
+       var admin=  localStorage.getItem('admin')
+        if (admin) {
+          this.getUser();
+     }
     },
     methods: {
     createUser(){
+         axios.post('api/auth/register',this.form).then((response) => {
+            this.users =response.data
+             $('#addNew').modal('hide');
+             toast.fire({
+                icon: 'success',title: 'usuario registrado con exito'
+              })
+             this.getUser();
+         }).catch((errors) => {
+           this.errors = errors.response.data.errors
+
+         })
     },
     updateUser(){
+      const data  ={
+        'id' :this.formedit.id,
+        'name' : this.form.name,
+        'email':this.form.email,
+        'roleid': this.form.roleid
+      }
+       axios.post('api/users/update',data).then((response) => {
+            const index = this.users.findIndex(item => item.id === response.data.id);
+             this.users[index] = response.data;
+            $('#addNew').modal('hide');
+             toast.fire({
+                icon: 'success',title: 'usuario  actualizado con exito'
+              })
+              this.getUser()
+         }).catch((errors) => {
+          this.errors = errors.response.data.errors
+               toast.fire({
+                icon: 'error',title: 'Error al  actualizadar el usuario'
+              })
+         })
+    },
+    DeleteUser(data){
+      Swal.fire({
+        title: 'Esta seguro de eliminar el usuario!',
+       showCancelButton: true,
+       confirmButtonText: `Eliminar `,
+       }).then((result) => {
+       if (result.isConfirmed) {
+         let dato ={
+           'id':data
+         }
+          axios.post('api/users/delete',dato).then((response) => {
+            const index = this.users.findIndex(item => item.id === data);
+            this.users.splice(index, 1);
+            toast.fire({
+                icon: 'success',title: 'usuario eliminado con exito'
+              })
+              this.getUser()
+          })
+     }
+    })
+        
+      
     },
     openModalWindow(){
+         this.errors ={}
          this.editMode = false
+          this.form= {
+                    id: '',
+                    name : '',
+                    email: '',
+                    password: '',
+                    roleid: ''
+                },
         $('#addNew').modal('show');
      },
      editModalWindow(user){
-        this.editMode = true
+       this.errors ={}
+        this.editMode = true;
+         this.form ={ 
+             'name' : user.name,
+             'email':  user.email,
+             'roleid': user.roles[0].id
+            }
+          this.formedit ={ 
+             'id' : user.id
+           }
         $('#addNew').modal('show');
         },
     getUser(){
@@ -111,7 +203,15 @@ export default {
             console.log(errors)
          })
       }
+    },
+    computed: {
+    searchUser() {
+ return datos.filter(item => {
+        return item.name.toLowerCase().includes(this.buscar.toLowerCase());
+      });
+       }
     }
+    
     
 }
 </script>

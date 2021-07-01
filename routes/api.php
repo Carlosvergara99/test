@@ -22,7 +22,17 @@ Route::group([ 'middleware' => 'api','prefix' => 'auth'], function ($router) {
     Route::post('permissson', 'AuthController@getPrmissions');
 
 });
-Route::group([ 'middleware' => 'api','prefix' => 'users'], function ($router) {
+Route::group([ 'middleware' => 'api','prefix' => 'users',], function () {
     Route::get('get', 'UsersController@getUsers');
+
+    Route::post('update', 'UsersController@UpdateUsers')->middleware('role:Admin');
+    Route::post('delete', 'UsersController@destroy')->middleware('role:Admin');
+
+});
+Route::group([ 'middleware' => 'api','prefix' => 'client'], function ($router) {
+    Route::get('get', 'ClientController@getClient');
+    Route::post('store', 'ClientController@StoreClient');
+    Route::post('update', 'ClientController@UpdateClient');
+    Route::post('delete', 'ClientController@destroy');
 
 });

@@ -51,7 +51,9 @@
                      localStorage.setItem('token', response.data.access_token)
                     this.$router.push('/')
                 }).catch((errors) => {
-                    this.errors = errors.response.data.errors
+                     toast.fire({
+                     icon: 'error',title: 'error  email o contraseña es incorrecta'
+                     })
                 })
             }
         }

@@ -24,8 +24,8 @@
                             <label  for="password_confirmation">Rol</label>
                             <select  class="form-control" name="" id="" v-model="formData.role" >
                             <option value="">Seleccione</option>
-                            <option value="1">Administrador</option>
-                            <option value="0">Vendedor</option>
+                            <option value="2">Administrador</option>
+                            <option value="1">Vendedor</option>
                             </select>
 
 
@@ -57,8 +57,7 @@
                     name: '',
                     email: '',
                     password: '',
-                    role: '',
-                    
+                    roleid: ''
                 },
                 errors: {}
             }
@@ -68,11 +67,15 @@
                 axios.post('api/auth/register', this.formData).then((response) => {
                     this.formData.name = this.formData.email = this.formData.password = this.formData.password_confirmation = ''
                     this.errors = {}
+                    toast.fire({
+                     icon: 'success',title: 'usuario registrado con exito'
+                     })
                     this.$router.push('/login')
-                    this.$toaster.success('Account created successfully, now you can login!')
                 }).catch((errors) => {
                     this.errors = errors.response.data.errors
-                    console.log(errors.response.data.errors)
+                    toast.fire({
+                     icon: 'error',title: 'error al registrar el usuario'
+                     })
                 });
             }
         }   

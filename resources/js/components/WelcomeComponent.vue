@@ -3,14 +3,14 @@
           <br>
         <div class="row justify-content-center">
             <div class="col-md-10">
-                <h5 class="text-center">Bienvenido <strong> {{currentUser}} </strong>  <a class="btn btn-danger" @click="logout">Logout</a></h5> 
+                <h5 class="text-center">Bienvenido <strong> {{currentUser}} </strong>  <a class="btn btn-danger btn-xs" @click="logout">Logout</a></h5> 
             </div>
         </div>
         <br>
 
      <ul class="nav nav-pills nav-justified">
        <li class="active" ><a  v-if="admin" class="btn btn-primary" data-toggle="pill" href="#user">Usarios</a></li>&nbsp; 
-       <li><a  class="btn" data-toggle="pill" href="#seller">Vendedor</a></li>&nbsp; 
+       <li><a  class="btn" data-toggle="pill" href="#seller">Cliente</a></li>&nbsp; 
     </ul>
   
   <div class="tab-content">
@@ -65,6 +65,8 @@ import User from "./User/index.vue";
                 axios.post('api/auth/permissson',dato).then((response) => {
                      if (response.data.role[0].role_id== 2) {
                         this.admin = true;
+                        localStorage.setItem('admin',  this.admin)
+
                      }
                 }).catch((errors) => {
                     console.log(errors)
@@ -75,6 +77,7 @@ import User from "./User/index.vue";
 
                 axios.post('api/auth/logout',data).then((response) => {
                     localStorage.removeItem('token')
+                    localStorage.removeItem('admin')
                     this.$router.push('/login')
                 }).catch((errors) => {
                     console.log(errors)
